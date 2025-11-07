@@ -11,11 +11,11 @@
     }
 
     body {
-        @apply bg-[#fafafa] font-nunito;
+        @apply bg-[#ffff] font-nunito;
     }
 
     body.dark {
-        @apply bg-[#060818];
+        @apply bg-[#0B0F12];
     }
 
     /* Panel */
@@ -28,7 +28,7 @@
         @apply sticky top-0 z-20;
     }
     .navbar-floating header {
-        @apply bg-[#fafafa]/90 px-6 pt-4 dark:bg-[#060818]/90;
+        @apply bg-[#ffff]/90 px-6 pt-4 dark:bg-[#060818]/90;
     }
     .navbar-floating header > div > div:first-child {
         @apply rounded-md;
@@ -676,4 +676,29 @@ img.dark-img {
 }
 .dark img.dark-img {
     @apply !block;
+}
+/* 1) Altura padrão do header para tudo usar o mesmo valor */
+:root {
+    --header-h: 56px; /* ajuste se seu header tiver outra altura */
+}
+
+/* 2) Header garante altura fixa (seu componente já usa sticky) */
+.navbar-sticky header,
+.navbar-floating header {
+    @apply sticky top-0 z-20;
+    height: var(--header-h); /* <- importante */
+}
+
+/* 3) Sidebar ocupa o restante da tela, iniciando abaixo do header */
+.sidebar {
+    top: var(--header-h);
+    height: calc(100vh - var(--header-h));
+}
+
+/* 4) Main preenche a altura restante e empurra o footer pro rodapé */
+.main-container .main-content {
+    @apply transition-all duration-300 lg:ltr:ml-[260px] lg:rtl:mr-[260px];
+    min-height: calc(100vh - var(--header-h));
+    display: flex;
+    flex-direction: column;
 }

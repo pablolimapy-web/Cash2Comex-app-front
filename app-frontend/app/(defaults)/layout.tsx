@@ -10,36 +10,20 @@ import Portals from '@/components/portals';
 
 export default function DefaultLayout({ children }: { children: React.ReactNode }) {
     return (
-        <>
-            {/* BEGIN MAIN CONTAINER */}
-            <div className="relative">
-                <Overlay />
-                <ScrollToTop />
+        <div className="relative">
+            <Overlay />
+            <ScrollToTop />
+            <Setting />
 
-                {/* BEGIN APP SETTING LAUNCHER */}
-                <Setting />
-                {/* END APP SETTING LAUNCHER */}
-
-                <MainContainer>
-                    {/* BEGIN SIDEBAR */}
-                    <Sidebar />
-                    {/* END SIDEBAR */}
-                    <div className="main-content flex min-h-screen flex-col">
-                        {/* BEGIN TOP NAVBAR */}
-                        <Header />
-                        {/* END TOP NAVBAR */}
-
-                        {/* BEGIN CONTENT AREA */}
-                        <ContentAnimation>{children}</ContentAnimation>
-                        {/* END CONTENT AREA */}
-
-                        {/* BEGIN FOOTER */}
-                        <Footer />
-                        {/* END FOOTER */}
-                        <Portals />
-                    </div>
-                </MainContainer>
-            </div>
-        </>
+            <MainContainer>
+                <Header />
+                <Sidebar />
+                <div className="main-content flex min-h-[calc(100vh-var(--header-h))] flex-col">
+                    <ContentAnimation>{children}</ContentAnimation>
+                    <Footer />
+                    <Portals />
+                </div>
+            </MainContainer>
+        </div>
     );
 }
