@@ -1,151 +1,171 @@
 'use client';
+
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
 import { toggleSidebar } from '@/store/themeConfigSlice';
-import AnimateHeight from 'react-animate-height';
 import { IRootState } from '@/store';
-import { useState, useEffect } from 'react';
-import IconCaretsDown from '@/components/icon/icon-carets-down';
-import IconMenuDashboard from '@/components/icon/menu/icon-menu-dashboard';
-import IconCaretDown from '@/components/icon/icon-caret-down';
-import IconMinus from '@/components/icon/icon-minus';
-import IconMenuChat from '@/components/icon/menu/icon-menu-chat';
-import IconMenuMailbox from '@/components/icon/menu/icon-menu-mailbox';
-import IconMenuTodo from '@/components/icon/menu/icon-menu-todo';
-import IconMenuNotes from '@/components/icon/menu/icon-menu-notes';
-import IconMenuScrumboard from '@/components/icon/menu/icon-menu-scrumboard';
-import IconMenuContacts from '@/components/icon/menu/icon-menu-contacts';
-import IconMenuInvoice from '@/components/icon/menu/icon-menu-invoice';
-import IconMenuCalendar from '@/components/icon/menu/icon-menu-calendar';
-import IconMenuComponents from '@/components/icon/menu/icon-menu-components';
-import IconMenuElements from '@/components/icon/menu/icon-menu-elements';
-import IconMenuCharts from '@/components/icon/menu/icon-menu-charts';
-import IconMenuWidgets from '@/components/icon/menu/icon-menu-widgets';
-import IconMenuFontIcons from '@/components/icon/menu/icon-menu-font-icons';
-import IconMenuDragAndDrop from '@/components/icon/menu/icon-menu-drag-and-drop';
-import IconMenuTables from '@/components/icon/menu/icon-menu-tables';
-import IconMenuDatatables from '@/components/icon/menu/icon-menu-datatables';
-import IconMenuForms from '@/components/icon/menu/icon-menu-forms';
-import IconMenuUsers from '@/components/icon/menu/icon-menu-users';
-import IconMenuPages from '@/components/icon/menu/icon-menu-pages';
-import IconMenuAuthentication from '@/components/icon/menu/icon-menu-authentication';
-import IconMenuDocumentation from '@/components/icon/menu/icon-menu-documentation';
+import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { getTranslation } from '@/i18n';
+import IconCaretsDown from '@/components/icon/icon-carets-down';
+
+// Ícones simples (próximos do visual do print)
+import {
+    Wallet,
+    ArrowRightLeft,
+    CreditCard,
+    Headphones,
+    Settings,
+    ExternalLink,
+    Eye,
+} from 'lucide-react';
 
 const Sidebar = () => {
     const dispatch = useDispatch();
     const { t } = getTranslation();
     const pathname = usePathname();
-    const [currentMenu, setCurrentMenu] = useState<string>('');
-    const [errorSubMenu, setErrorSubMenu] = useState(false);
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const semidark = useSelector((state: IRootState) => state.themeConfig.semidark);
-    const toggleMenu = (value: string) => {
-        setCurrentMenu((oldValue) => {
-            return oldValue === value ? '' : value;
-        });
-    };
-
-    useEffect(() => {
-        const selector = document.querySelector('.sidebar ul a[href="' + window.location.pathname + '"]');
-        if (selector) {
-            selector.classList.add('active');
-            const ul: any = selector.closest('ul.sub-menu');
-            if (ul) {
-                let ele: any = ul.closest('li.menu').querySelectorAll('.nav-link') || [];
-                if (ele.length) {
-                    ele = ele[0];
-                    setTimeout(() => {
-                        ele.click();
-                    });
-                }
-            }
-        }
-    }, []);
 
     useEffect(() => {
         setActiveRoute();
-        if (window.innerWidth < 1024 && themeConfig.sidebar) {
-            dispatch(toggleSidebar());
-        }
     }, [pathname]);
 
     const setActiveRoute = () => {
-        let allLinks = document.querySelectorAll('.sidebar ul a.active');
+        const allLinks = document.querySelectorAll('.sidebar ul a.active');
         for (let i = 0; i < allLinks.length; i++) {
             const element = allLinks[i];
             element?.classList.remove('active');
         }
-        const selector = document.querySelector('.sidebar ul a[href="' + window.location.pathname + '"]');
+        const selector = document.querySelector(
+            '.sidebar ul a[href="' + window.location.pathname + '"]'
+        );
         selector?.classList.add('active');
     };
+
+    const Item = ({
+                      href,
+                      icon,
+                      children,
+                      external,
+                  }: {
+        href: string;
+        icon: React.ReactNode;
+        children: React.ReactNode;
+        external?: boolean;
+    }) => {
+        const active = pathname === href;
+        const className = [
+            'group flex items-center justify-between rounded-xl px-3 py-2',
+            active ? 'bg-white/10 text-white' : 'text-white/80 hover:bg-white/5',
+        ].join(' ');
+
+        return (
+            <Link href={href} className={className}>
+        <span className="flex items-center gap-2">
+          <span className="opacity-90">{icon}</span>
+            {children}
+        </span>
+                {external ? (
+                    <ExternalLink size={14} className="text-white/40 group-hover:text-white/60" />
+                ) : null}
+            </Link>
+        );
+    };
+
+    const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+        <div className="mt-5 first:mt-0">
+            <div className="-mx-4 mb-2 px-7 py-2 text-xs font-extrabold uppercase tracking-wide text-white/40">
+                {title}
+            </div>
+            <div className="grid gap-1">{children}</div>
+        </div>
+    );
 
     return (
         <div className={semidark ? 'dark' : ''}>
             <nav
-                className={`sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] transition-all duration-300 ${semidark ? 'text-white-dark' : ''}`}
+                className={`sidebar fixed bottom-0 top-0 z-50 h-full min-h-screen w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] transition-all duration-300 ${
+                    semidark ? 'text-white-dark' : ''
+                }`}
             >
-                <div className="h-full bg-white dark:bg-black">
+                {/* Fundo escuro translúcido, similar ao print */}
+                <div className="h-full bg-[#0B0F12] text-white">
+                    {/* Topo com logo e ícone de colapsar */}
                     <div className="flex items-center justify-between px-4 py-3">
                         <Link href="/" className="main-logo flex shrink-0 items-center">
                             <img className="ml-[5px] w-8 flex-none" src="/assets/images/logo.svg" alt="logo" />
-                            <span className="align-middle text-2xl font-semibold ltr:ml-1.5 rtl:mr-1.5 dark:text-white-light lg:inline">VRISTO</span>
+                            <span className="align-middle text-2xl font-semibold ltr:ml-1.5 rtl:mr-1.5 lg:inline">
+                VRISTO
+              </span>
                         </Link>
 
                         <button
                             type="button"
-                            className="collapse-icon flex h-8 w-8 items-center rounded-full transition duration-300 hover:bg-gray-500/10 rtl:rotate-180 dark:text-white-light dark:hover:bg-dark-light/10"
+                            className="collapse-icon flex h-8 w-8 items-center rounded-full transition duration-300 hover:bg-white/10 rtl:rotate-180"
                             onClick={() => dispatch(toggleSidebar())}
                         >
                             <IconCaretsDown className="m-auto rotate-90" />
                         </button>
                     </div>
+
                     <PerfectScrollbar className="relative h-[calc(100vh-80px)]">
-                        <ul className="relative space-y-0.5 p-4 py-0 font-semibold">
-                            <h2 className="-mx-4 mb-1 flex items-center bg-white-light/30 px-7 py-3 font-extrabold uppercase dark:bg-dark dark:bg-opacity-[0.08]">
-                                <IconMinus className="hidden h-5 w-4 flex-none" />
-                                <span>{t('apps')}</span>
-                            </h2>
+                        <ul className="relative space-y-6 p-4 py-0 font-semibold">
+                            {/* Card: Saldo disponível */}
+                            <li>
+                                <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-white/70">Saldo disponível</span>
+                                        <button
+                                            aria-label="mostrar/ocultar"
+                                            className="rounded-xl border border-white/10 p-1 text-white/60 hover:bg-white/5"
+                                        >
+                                            <Eye size={14} />
+                                        </button>
+                                    </div>
+                                    <div className="mt-2 text-2xl font-semibold text-white">R$ 0,00</div>
+                                    <div className="mt-1 flex items-center gap-2 text-xs text-white/60">
+                                        <span className="inline-block h-2 w-2 rounded-full bg-emerald-500/80" />
+                                        Valor indisponível
+                                    </div>
+                                </div>
+                            </li>
 
-                            <li className="nav-item">
-                                <ul>
-                                    <li className="nav-item">
-                                        <Link href="/apps/notes" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuNotes className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('notes')}</span>
-                                            </div>
-                                        </Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link href="/apps/scrumboard" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuScrumboard className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('scrumboard')}</span>
-                                            </div>
-                                        </Link>
-                                    </li>
-                                    <li className="nav-item">
-                                        <Link href="/apps/contacts" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuContacts className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('contacts')}</span>
-                                            </div>
-                                        </Link>
-                                    </li>
+                            {/* Seções (iguais à imagem) */}
+                            <li>
+                                <Section title="Criptomoedas">
+                                    <Item href="/comprar" icon={<CreditCard size={16} />} external>
+                                        Comprar
+                                    </Item>
+                                    <Item href="/vender" icon={<ArrowRightLeft size={16} />} external>
+                                        Vender
+                                    </Item>
+                                </Section>
 
+                                <Section title="Minha Conta">
+                                    <Item href="/finance/extrato" icon={<Wallet size={16} />}>
+                                        Extrato
+                                    </Item>
+                                    <Item href="/transferencias" icon={<ArrowRightLeft size={16} />}>
+                                        Transferências
+                                    </Item>
+                                    <Item href="/pagamentos" icon={<CreditCard size={16} />}>
+                                        Pagamentos
+                                    </Item>
+                                    <Item href="/afiliado/extrato" icon={<Wallet size={16} />}>
+                                        Extrato Afiliado
+                                    </Item>
+                                </Section>
 
-                                    <li className="nav-item">
-                                        <Link href="/apps/calendar" className="group">
-                                            <div className="flex items-center">
-                                                <IconMenuCalendar className="shrink-0 group-hover:!text-primary" />
-                                                <span className="text-black ltr:pl-3 rtl:pr-3 dark:text-[#506690] dark:group-hover:text-white-dark">{t('calendar')}</span>
-                                            </div>
-                                        </Link>
-                                    </li>
-                                </ul>
+                                <Section title="Ajuda">
+                                    <Item href="/suporte-whatsapp" icon={<Headphones size={16} />} external>
+                                        Suporte WhatsApp
+                                    </Item>
+                                    <Item href="/configuracoes" icon={<Settings size={16} />}>
+                                        Configurações
+                                    </Item>
+                                </Section>
                             </li>
                         </ul>
                     </PerfectScrollbar>
@@ -154,4 +174,5 @@ const Sidebar = () => {
         </div>
     );
 };
+
 export default Sidebar;
