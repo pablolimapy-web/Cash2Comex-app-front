@@ -419,16 +419,20 @@ function Internal4PayView() {
                         key={t.id}
                         type="button"
                         onClick={() => setTab(t.id)}
-                        className={`rounded-md px-3 py-1.5 text-sm font-semibold transition ${
+                        className={`rounded-md px-3 py-1.5 text-sm font-semibold transition-all duration-200
+        ${
                             tab === t.id
-                                ? 'bg-amber-300/30 text-amber-900 dark:bg-amber-300/20 dark:text-amber-200'
-                                : 'text-slate-600 hover:bg-slate-100 dark:text-white/70 dark:hover:bg-white/10'
+                                ? // 🔹 ativo
+                                'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-sm dark:from-purple-600 dark:to-indigo-600'
+                                : // 🔹 inativo
+                                'text-slate-600 hover:bg-slate-100 dark:text-white/70 dark:hover:bg-white/10'
                         }`}
                     >
                         {t.label}
                     </button>
                 ))}
             </div>
+
 
             {/* Campo principal por aba */}
             {tab === 'account' && (
@@ -531,10 +535,20 @@ function Internal4PayView() {
             <button
                 type="submit"
                 disabled={!canSubmit}
-                className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-lg bg-amber-300/90 px-5 text-sm font-semibold text-slate-900 shadow hover:bg-amber-300 active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-60"
+                className={`
+                mt-2 inline-flex h-11 w-full items-center justify-center rounded-lg
+                bg-gradient-to-r from-purple-500 to-indigo-500
+                text-white text-sm font-semibold shadow-md
+                transition-all duration-300
+                hover:from-purple-600 hover:to-indigo-600
+                active:scale-[.98]
+                disabled:cursor-not-allowed disabled:opacity-60
+                dark:from-purple-600 dark:to-indigo-700
+              `}
             >
                 Finalizar transferência
             </button>
+
         </form>
     );
 }

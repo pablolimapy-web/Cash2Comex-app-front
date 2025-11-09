@@ -144,14 +144,18 @@ export default function Header() {
             </span>
                     </div>
 
-                    {/* comprar cripto */}
                     <Link
                         href="/comprar-cripto"
                         className="
-              rounded-full border px-3 py-1.5 text-sm font-medium
-              border-lime-600/30 bg-lime-600/10 text-lime-700 hover:bg-lime-600/15
-              dark:border-lime-400/30 dark:bg-lime-500/20 dark:text-lime-200 dark:hover:bg-lime-500/30
-            "
+                        inline-flex items-center justify-center
+                        rounded-full px-4 py-1.5 text-sm font-medium
+                        text-white shadow-sm
+                        bg-gradient-to-r from-purple-500 to-indigo-500
+                        hover:from-purple-600 hover:to-indigo-600
+                        active:scale-[.97]
+                        transition-all duration-300
+                        dark:from-purple-600 dark:to-indigo-700
+                      "
                     >
                         Comprar cripto
                     </Link>
