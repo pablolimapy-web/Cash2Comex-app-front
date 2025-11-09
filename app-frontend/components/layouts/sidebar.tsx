@@ -187,7 +187,7 @@ const Sidebar = () => {
                                 <Item href="/pagamentos" icon={<CreditCard size={16} />}>
                                     Pagamentos
                                 </Item>
-                                <Item href="/afiliado/extrato" icon={<Wallet size={16} />}>
+                                <Item href="/extrato-afiliado" icon={<Wallet size={16} />}>
                                     Extrato Afiliado
                                 </Item>
                             </Section>
