@@ -193,7 +193,7 @@ const Sidebar = () => {
                             </Section>
 
                             <Section title="Ajuda">
-                                <Item href="/suporte-whatsapp" icon={<Headphones size={16} />} external>
+                                <Item href="/suporte" icon={<Headphones size={16} />} external>
                                     Suporte WhatsApp
                                 </Item>
                                 <Item href="/configuracoes" icon={<Settings size={16} />}>
