@@ -71,6 +71,7 @@ const Sidebar = () => {
                     <ExternalLink size={14} className="text-white/40 group-hover:text-white/60" />
                 ) : null}
             </Link>
+
         );
     };
 
@@ -135,10 +136,10 @@ const Sidebar = () => {
                             {/* Seções (iguais à imagem) */}
                             <li>
                                 <Section title="Criptomoedas">
-                                    <Item href="/comprar" icon={<CreditCard size={16} />} external>
+                                    <Item href="/buy" icon={<CreditCard size={16} />}>
                                         Comprar
                                     </Item>
-                                    <Item href="/vender" icon={<ArrowRightLeft size={16} />} external>
+                                    <Item href="/buy?mode=sell" icon={<ArrowRightLeft size={16} />}>
                                         Vender
                                     </Item>
                                 </Section>

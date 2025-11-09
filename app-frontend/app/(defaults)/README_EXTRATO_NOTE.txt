@@ -1,1 +1,0 @@
-Nova rota criada: /finance/extrato
