@@ -16,7 +16,7 @@ export default function Page() {
                 <p className="
                   mt-1 text-sm text-slate-600 dark:text-white/70
                   transition-colors duration-300">
-                    Acompanhe todos os detalhes da sua conta 4Pay.
+                    Acompanhe todos os detalhes da sua conta Cash2Comex.
                 </p>
             </div>
 
