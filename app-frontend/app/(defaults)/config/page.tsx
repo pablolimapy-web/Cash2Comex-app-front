@@ -23,18 +23,13 @@ function cpfMask(v: string) {
 function phoneMask(v: string) {
     const d = v.replace(/\D/g, '').slice(0, 11);
     if (d.length <= 10) {
-        return d
-            .replace(/^(\d{2})(\d)/, '($1) $2')
-            .replace(/(\d{4})(\d)/, '$1-$2');
+        return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2');
     }
-    return d
-        .replace(/^(\d{2})(\d)/, '($1) $2')
-        .replace(/(\d{5})(\d)/, '$1-$2');
+    return d.replace(/^(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
 }
 function validateEmail(v: string) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 }
-// Validação simples de CPF (dígitos verificadores)
 function validateCPF(cpf: string) {
     const c = cpf.replace(/\D/g, '');
     if (!c || c.length !== 11 || /^(\d)\1+$/.test(c)) return false;
@@ -60,16 +55,15 @@ function strength(p: string) {
 }
 
 /* ----------------------------- Page ----------------------------- */
-
 type Tab = 'geral' | 'senha';
 
 export default function SettingsPage() {
     const [tab, setTab] = useState<Tab>('geral');
 
-    // mocks iniciais (substitua pelos dados reais)
+    // mocks (troque por fetch real)
     const [name, setName] = useState('Marcos Paulo De Souza');
-    const [phone, setPhone] = useState('5543984248181'); // sem máscara
-    const [cpf, setCpf] = useState('00832507946');       // sem máscara
+    const [phone, setPhone] = useState('5543984248181');
+    const [cpf, setCpf] = useState('00832507946');
     const [email, setEmail] = useState('mps32.ms@gmail.com');
     const [emailVerifiedAt] = useState<Date | null>(new Date());
 
@@ -86,13 +80,15 @@ export default function SettingsPage() {
     const [savedPass, setSavedPass] = useState(false);
     const st = strength(newPass);
 
-    // valores mascarados na UI
+    // mascarados
     const phoneUI = useMemo(() => phoneMask(phone), [phone]);
     const cpfUI = useMemo(() => cpfMask(cpf), [cpf]);
 
-    // animação de entrada
+    // flag para animar entrada
+    const [mounted, setMounted] = useState(false);
     useEffect(() => {
-        document.documentElement.classList.add('supports-[animation]');
+        const t = setTimeout(() => setMounted(true), 0);
+        return () => clearTimeout(t);
     }, []);
 
     const onSave = async () => {
@@ -108,7 +104,6 @@ export default function SettingsPage() {
 
         setSaving(true);
         setSaved(false);
-        // TODO: enviar para API
         await new Promise((r) => setTimeout(r, 900));
         setSaving(false);
         setSaved(true);
@@ -120,15 +115,10 @@ export default function SettingsPage() {
         if (!currentPass) errors.push('Informe a senha atual.');
         if (st < 3) errors.push('A nova senha é muito fraca.');
         if (newPass !== confirmPass) errors.push('A confirmação não confere.');
-
-        if (errors.length) {
-            alert(errors.join('\n'));
-            return;
-        }
+        if (errors.length) return alert(errors.join('\n'));
 
         setSavingPass(true);
         setSavedPass(false);
-        // TODO: chamar API
         await new Promise((r) => setTimeout(r, 900));
         setSavingPass(false);
         setSavedPass(true);
@@ -139,12 +129,26 @@ export default function SettingsPage() {
     };
 
     return (
-        <section className="p-6 animate-[fadeIn_.35s_ease]">
-            {/* header visual (avatar + infos) */}
-            <div className="mb-6 rounded-2xl border border-slate-200 bg-white/70 p-6 dark:border-white/10 dark:bg-[#0d1117]">
+        <section
+            className={[
+                'p-6 transition-all duration-500',
+                mounted ? 'animate-fade-in' : 'opacity-0',
+            ].join(' ')}
+        >
+            {/* header */}
+            <div
+                className={[
+                    'mb-6 rounded-2xl border border-slate-200 bg-white/70 p-6 dark:border-white/10 dark:bg-[#0d1117] transition-all',
+                    mounted ? 'animate-slide-up' : 'opacity-0 translate-y-3',
+                ].join(' ')}
+            >
                 <div className="flex items-center gap-4">
                     <div className="grid h-14 w-14 place-items-center rounded-full bg-purple-500/15 text-purple-300 dark:bg-purple-500/20 dark:text-purple-200">
-                        {name.split(' ').slice(0, 2).map((s) => s[0]?.toUpperCase()).join('')}
+                        {name
+                            .split(' ')
+                            .slice(0, 2)
+                            .map((s) => s[0]?.toUpperCase())
+                            .join('')}
                     </div>
                     <div>
                         <h1 className="text-lg font-semibold text-slate-900 dark:text-white">{name}</h1>
@@ -156,22 +160,24 @@ export default function SettingsPage() {
                 <div className="mt-6 flex gap-2">
                     <button
                         onClick={() => setTab('geral')}
-                        className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                        className={[
+                            'rounded-full px-4 py-2 text-sm font-semibold transition',
                             tab === 'geral'
                                 ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                                : 'border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-[#1f2a36] dark:text-white/80 dark:hover:bg-[#19212e]'
-                        }`}
+                                : 'border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-[#1f2a36] dark:text-white/80 dark:hover:bg-[#19212e]',
+                        ].join(' ')}
                     >
                         Informações gerais
                     </button>
 
                     <button
                         onClick={() => setTab('senha')}
-                        className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                        className={[
+                            'rounded-full px-4 py-2 text-sm font-semibold transition',
                             tab === 'senha'
                                 ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                                : 'border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-[#1f2a36] dark:text-white/80 dark:hover:bg-[#19212e]'
-                        }`}
+                                : 'border border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-[#1f2a36] dark:text-white/80 dark:hover:bg-[#19212e]',
+                        ].join(' ')}
                     >
                         Senha
                     </button>
@@ -180,7 +186,12 @@ export default function SettingsPage() {
 
             {/* conteúdo das abas */}
             {tab === 'geral' ? (
-                <div className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#0d1117]">
+                <div
+                    className={[
+                        'grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#0d1117]',
+                        mounted ? 'animate-pop-in' : 'opacity-0 scale-95',
+                    ].join(' ')}
+                >
                     {/* nome */}
                     <div>
                         <label className="mb-1 block text-sm font-semibold text-slate-700 dark:text-white/90">
@@ -276,7 +287,12 @@ export default function SettingsPage() {
                     )}
                 </div>
             ) : (
-                <div className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#0d1117]">
+                <div
+                    className={[
+                        'grid gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-[#0d1117]',
+                        mounted ? 'animate-pop-in' : 'opacity-0 scale-95',
+                    ].join(' ')}
+                >
                     {/* senha atual */}
                     <div>
                         <label className="mb-1 block text-sm font-semibold text-slate-700 dark:text-white/90">
@@ -359,8 +375,3 @@ export default function SettingsPage() {
         </section>
     );
 }
-
-/* ----------------------------- styles base -----------------------------
-Se você ainda não tem, adicione classes utilitárias em globals:
-.form-input / .form-textarea / .form-select seguem o padrão das suas outras telas
---------------------------------------------------------------------------- */

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
-const WHATS_NUMBER = '5599999999999'; // DDI+DDD+número
+const WHATS_NUMBER = '5599999999999';
 const DEFAULT_MSG = 'Olá! Preciso de ajuda com minha conta Cash2Comex.';
 
 export default function SuporteWhatsappPage() {
@@ -31,14 +31,7 @@ export default function SuporteWhatsappPage() {
     }, [targetUrl]);
 
     return (
-        <main
-            className="
-        relative min-h-screen overflow-hidden
-        bg-gradient-to-b from-[#f7f3ff] to-white
-        text-slate-900
-        dark:from-[#0b0717] dark:to-[#0b0717] dark:text-white
-      "
-        >
+        <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-[#f7f3ff] to-white text-slate-900 dark:from-[#0b0717] dark:to-[#0b0717] dark:text-white animate-fade-in">
             {/* Glow roxo */}
             <div className="pointer-events-none absolute inset-0 grid place-items-center">
                 <div className="h-[520px] w-[520px] rounded-full bg-purple-500/25 blur-3xl dark:bg-purple-700/25" />
@@ -46,8 +39,7 @@ export default function SuporteWhatsappPage() {
 
             {/* Conteúdo central */}
             <section className="relative z-10 mx-auto grid min-h-[70vh] w-full max-w-3xl place-items-center px-6">
-                <div className="w-full rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-xl backdrop-blur-sm dark:border-white/10 dark:bg-white/5 dark:shadow-[0_15px_60px_-15px_rgba(0,0,0,0.6)]">
-                    {/* LOGO animada */}
+                <div className="w-full rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-xl backdrop-blur-sm dark:border-white/10 dark:bg-white/5 dark:shadow-[0_15px_60px_-15px_rgba(0,0,0,0.6)] animate-pop-in">
                     <div className="mb-6 flex justify-center">
                         <img
                             src="/assets/images/LogoReal.png"
@@ -56,7 +48,6 @@ export default function SuporteWhatsappPage() {
                         />
                     </div>
 
-                    {/* Dots */}
                     <div className="mb-4 flex items-center justify-center gap-8">
                         <Dots />
                     </div>
@@ -68,11 +59,7 @@ export default function SuporteWhatsappPage() {
 
                     <a
                         href={targetUrl}
-                        className="
-              mt-6 inline-flex items-center gap-2 rounded-xl
-              bg-purple-600 px-5 py-2 text-sm font-semibold text-white
-              hover:bg-purple-500 transition-colors
-            "
+                        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2 text-sm font-semibold text-white hover:bg-purple-500 transition-colors"
                     >
                         <Loader2 className="h-4 w-4 animate-spin" />
                         Abrir agora
@@ -83,7 +70,6 @@ export default function SuporteWhatsappPage() {
     );
 }
 
-/* --- Dots animado --- */
 function Dots() {
     return (
         <div className="flex items-center gap-2">

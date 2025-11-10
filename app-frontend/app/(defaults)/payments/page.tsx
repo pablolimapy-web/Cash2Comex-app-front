@@ -1,16 +1,16 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Plus, CalendarDays, ReceiptText } from 'lucide-react';
 import PayBoletoModal, { DecodedBoleto } from '@/components/payments/PayBoletoModal';
 
 type PaymentRow = {
     id: string;
     contaId: string;
-    data: string; // ISO
+    data: string;
     moeda: 'BRL';
-    valorBRL: number; // centavos
-    vencimento?: string; // ISO
+    valorBRL: number;
+    vencimento?: string;
     status: 'A pagar' | 'Pago' | 'Em análise';
 };
 
@@ -20,6 +20,12 @@ const MOCK_ROWS: PaymentRow[] = [
 ];
 
 export default function PaymentsPage() {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        const t = setTimeout(() => setMounted(true), 0);
+        return () => clearTimeout(t);
+    }, []);
+
     const [open, setOpen] = useState(false);
     const [decoded, setDecoded] = useState<DecodedBoleto | null>(null);
 
@@ -31,7 +37,7 @@ export default function PaymentsPage() {
     return (
         <section className="space-y-6 p-6">
             {/* Cabeçalho */}
-            <div className="flex items-end justify-between gap-4">
+            <div className={mounted ? 'flex items-end justify-between gap-4 animate-slide-up' : 'opacity-0 translate-y-3'}>
                 <div>
                     <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Pagamento de boletos</h1>
                     <p className="mt-1 text-sm text-slate-600 dark:text-white/70">Acompanhe todos os seus pagamentos.</p>
@@ -49,7 +55,7 @@ export default function PaymentsPage() {
             </div>
 
             {/* Filtro (mock) */}
-            <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-[#1c2533] dark:bg-[#0d1117]">
+            <div className={mounted ? 'rounded-xl border border-slate-200 bg-white p-4 dark:border-[#1c2533] dark:bg-[#0d1117] animate-pop-in' : 'opacity-0 scale-95'}>
                 <div className="flex flex-wrap items-center gap-3">
                     <label className="text-sm font-semibold text-slate-700 dark:text-white/80">Período</label>
                     <div className="relative">
@@ -72,24 +78,13 @@ export default function PaymentsPage() {
             </div>
 
             {/* Tabela */}
-            <div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-[#1c2533] dark:bg-[#0d1117]">
+            <div className={mounted ? 'rounded-xl border border-slate-200 bg-white shadow-sm dark:border-[#1c2533] dark:bg-[#0d1117] animate-fade-in' : 'opacity-0'}>
                 <div className="table-responsive">
                     <table className="w-full">
                         <thead>
                         <tr>
-                            {[
-                                'Conta/ID',
-                                'Data de pagamento',
-                                'Moeda',
-                                'Valor em BRL',
-                                'Vencimento',
-                                'Status do pagamento',
-                                'Ações',
-                            ].map((h) => (
-                                <th
-                                    key={h}
-                                    className="bg-slate-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:bg-[#0f1520] dark:text-white/70"
-                                >
+                            {['Conta/ID','Data de pagamento','Moeda','Valor em BRL','Vencimento','Status do pagamento','Ações'].map((h) => (
+                                <th key={h} className="bg-slate-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:bg-[#0f1520] dark:text-white/70">
                                     {h}
                                 </th>
                             ))}
@@ -98,17 +93,11 @@ export default function PaymentsPage() {
                         <tbody className="divide-y divide-slate-100 dark:divide-[#141b26]">
                         {MOCK_ROWS.map((r) => (
                             <tr key={r.id} className="hover:bg-slate-50/50 dark:hover:bg-[#0f1520]/60">
-                                <td className="px-4 py-3 font-mono text-sm text-slate-700 dark:text-white/80">
-                                    {r.contaId} / {r.id}
-                                </td>
-                                <td className="px-4 py-3 text-slate-700 dark:text-white/80">
-                                    {new Date(r.data).toLocaleDateString('pt-BR')}
-                                </td>
+                                <td className="px-4 py-3 font-mono text-sm text-slate-700 dark:text-white/80">{r.contaId} / {r.id}</td>
+                                <td className="px-4 py-3 text-slate-700 dark:text-white/80">{new Date(r.data).toLocaleDateString('pt-BR')}</td>
                                 <td className="px-4 py-3 text-slate-700 dark:text-white/80">BRL</td>
                                 <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">
-                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-                                        r.valorBRL / 100
-                                    )}
+                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(r.valorBRL / 100)}
                                 </td>
                                 <td className="px-4 py-3 text-slate-700 dark:text-white/80">
                                     {r.vencimento ? new Date(r.vencimento).toLocaleDateString('pt-BR') : '—'}
@@ -148,7 +137,6 @@ export default function PaymentsPage() {
                                 </td>
                             </tr>
                         ))}
-
                         {MOCK_ROWS.length === 0 && (
                             <tr>
                                 <td colSpan={7} className="px-6 py-10">

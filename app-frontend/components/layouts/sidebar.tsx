@@ -178,22 +178,22 @@ const Sidebar = () => {
                             </Section>
 
                             <Section title="Minha Conta">
-                                <Item href="/finance/extrato" icon={<Wallet size={16} />}>
+                                <Item href="/finance/extract" icon={<Wallet size={16} />}>
                                     Extrato
                                 </Item>
-                                <Item href="/transferencias" icon={<ArrowRightLeft size={16} />}>
+                                <Item href="/transfers" icon={<ArrowRightLeft size={16} />}>
                                     Transferências
                                 </Item>
-                                <Item href="/pagamentos" icon={<CreditCard size={16} />}>
+                                <Item href="/payments" icon={<CreditCard size={16} />}>
                                     Pagamentos
                                 </Item>
-                                <Item href="/extrato-afiliado" icon={<Wallet size={16} />}>
+                                <Item href="/affiliate" icon={<Wallet size={16} />}>
                                     Extrato Afiliado
                                 </Item>
                             </Section>
 
                             <Section title="Ajuda">
-                                <Item href="/suporte" icon={<Headphones size={16} />} external>
+                                <Item href="/support" icon={<Headphones size={16} />} external>
                                     Suporte WhatsApp
                                 </Item>
                                 <Item href="/config" icon={<Settings size={16} />}>
