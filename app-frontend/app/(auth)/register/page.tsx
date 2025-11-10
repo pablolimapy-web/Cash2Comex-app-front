@@ -2,18 +2,21 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, UserRound, CheckCircle2, ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { authService } from '@/services/authService';
 
 export default function RegisterPage() {
+    const router = useRouter();
     const [showPass, setShowPass] = useState(false);
     const [showPass2, setShowPass2] = useState(false);
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '', agree: false });
-    const [errors, setErrors] = useState<Partial<typeof form>>({});
+    const [errors, setErrors] = useState<Partial<typeof form> & { api?: string }>({});
 
     function validate() {
-        const e: Partial<typeof form> = {};
+        const e: Partial<typeof form> & { api?: string } = {};
         if (!form.name) e.name = 'Informe seu nome.';
         if (!form.email) e.email = 'Informe seu e-mail.';
         if (!form.password) e.password = 'Crie uma senha.';
@@ -28,12 +31,18 @@ export default function RegisterPage() {
         e.preventDefault();
         if (!validate()) return;
         setLoading(true);
-        // FRONT-ONLY: simula cadastro
-        setTimeout(() => {
+        setErrors({});
+        try {
+            await authService.register({ name: form.name.trim(), email: form.email.trim(), password: form.password });
+            // Após cadastro bem-sucedido -> opcional: já logar
+            // const login = await authService.login({ email: form.email, password: form.password });
+            // router.replace('/buy');
+            router.replace('/login');
+        } catch (err: any) {
+            setErrors((p) => ({ ...p, api: err?.message || 'Falha ao criar conta.' }));
+        } finally {
             setLoading(false);
-            console.log('Cadastro ✅', form);
-            window.location.href = '/login';
-        }, 1000);
+        }
     }
 
     return (
@@ -71,8 +80,11 @@ export default function RegisterPage() {
                 </div>
 
                 {/* Email */}
-                <div className={`overflow-hidden rounded-xl border bg-black/20
-                 ${errors.email ? 'border-red-500/50' : 'border-white/10 focus-within:border-white/25'}`}>
+                <div
+                    className={`overflow-hidden rounded-xl border bg-black/20 ${
+                        errors.email ? 'border-red-500/50' : 'border-white/10 focus-within:border-white/25'
+                    }`}
+                >
                     <div className="grid grid-cols-[1fr_auto] items-center px-3">
                         <div className="flex items-center gap-2">
                             <Mail size={16} className="text-white/50" />
@@ -84,40 +96,43 @@ export default function RegisterPage() {
                                 autoCapitalize="none"
                                 spellCheck={false}
                                 value={form.email}
-                                onChange={(e) => setForm(s => ({ ...s, email: e.target.value }))}
+                                onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))}
                                 className="h-12 w-full bg-transparent text-white/90 placeholder-white/40 outline-none border-0"
                             />
                         </div>
-                        {/* botão opcional do lado direito, se quiser (ex: limpar) */}
-                        {/* <button className="rounded-lg p-2 text-white/60 hover:bg-white/10">…</button> */}
                     </div>
                 </div>
+                {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
 
                 {/* Senha */}
-                <div className={`overflow-hidden rounded-xl border bg-black/20
-                 ${errors.password ? 'border-red-500/50' : 'border-white/10 focus-within:border-white/25'}`}>
+                <div
+                    className={`overflow-hidden rounded-xl border bg-black/20 ${
+                        errors.password ? 'border-red-500/50' : 'border-white/10 focus-within:border-white/25'
+                    }`}
+                >
                     <div className="grid grid-cols-[1fr_auto] items-center px-3">
                         <div className="flex items-center gap-2">
                             <Lock size={16} className="text-white/50" />
                             <input
                                 type={showPass ? 'text' : 'password'}
                                 placeholder="Sua senha"
-                                autoComplete="new-password" /* no login use current-password */
+                                autoComplete="new-password"
                                 value={form.password}
-                                onChange={(e) => setForm(s => ({ ...s, password: e.target.value }))}
+                                onChange={(e) => setForm((s) => ({ ...s, password: e.target.value }))}
                                 className="h-12 w-full bg-transparent text-white/90 placeholder-white/40 outline-none border-0"
                             />
                         </div>
                         <button
                             type="button"
-                            onClick={() => setShowPass(s => !s)}
+                            onClick={() => setShowPass((s) => !s)}
                             className="ml-2 rounded-lg p-2 text-white/60 hover:bg-white/10"
                             aria-label="Alternar visibilidade da senha"
                         >
-                            {showPass ? <EyeOff size={16}/> : <Eye size={16}/>}
+                            {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                     </div>
                 </div>
+                {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password}</p>}
 
                 {/* Confirmar senha */}
                 <div>
@@ -148,7 +163,9 @@ export default function RegisterPage() {
                     <button
                         type="button"
                         onClick={() => setForm((s) => ({ ...s, agree: !s.agree }))}
-                        className={`mt-0.5 grid h-5 w-5 place-content-center rounded border ${form.agree ? 'border-emerald-400 bg-emerald-500/20' : 'border-white/20'} `}
+                        className={`mt-0.5 grid h-5 w-5 place-content-center rounded border ${
+                            form.agree ? 'border-emerald-400 bg-emerald-500/20' : 'border-white/20'
+                        } `}
                         aria-pressed={form.agree}
                     >
                         {form.agree && <CheckCircle2 size={16} className="text-emerald-400" />}
@@ -165,6 +182,7 @@ export default function RegisterPage() {
           </span>
                 </div>
                 {errors.agree && <p className="text-xs text-red-400">{String(errors.agree)}</p>}
+                {errors.api && <p className="text-xs text-red-400">{errors.api}</p>}
 
                 {/* Submit */}
                 <button
