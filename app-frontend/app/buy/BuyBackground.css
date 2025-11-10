@@ -1,0 +1,159 @@
+/* ============================
+   Cash2Comex – Background Pro
+   ============================ */
+
+.c2c-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+
+    /* Paleta base (Claro) */
+    --bg: 246, 248, 252;           /* fundo */
+    --g-a:  99,102,241;            /* índigo */
+    --g-b:  56,189,248;            /* sky */
+    --g-c:  34,197,94;             /* green (coin) */
+    --grid: 255,255,255;           /* linhas da grid */
+    --shadow: 17,24,39;            /* sombra sutil */
+
+    background:
+        radial-gradient(900px 600px at 12% 28%, rgba(var(--g-a), .10), transparent 60%),
+        radial-gradient(900px 600px at 86% 78%, rgba(var(--g-b), .10), transparent 60%),
+        linear-gradient(120deg, rgba(var(--g-a), .06) 0%, rgba(var(--g-b), .06) 40%, rgba(var(--g-c), .06) 100%),
+        rgb(var(--bg));
+    animation: c2c-bg-pan 40s linear infinite;
+    filter: contrast(1.02) saturate(1.03);
+}
+
+/* Dark */
+:root.dark .c2c-bg {
+    --bg: 8,11,15;
+    --g-a: 139,92,246;
+    --g-b: 14,165,233;
+    --g-c: 34,197,94;
+    --grid: 148,163,184;
+    --shadow: 0,0,0;
+
+    background:
+        radial-gradient(900px 600px at 12% 28%, rgba(var(--g-a), .16), transparent 60%),
+        radial-gradient(900px 600px at 86% 78%, rgba(var(--g-b), .16), transparent 60%),
+        linear-gradient(120deg, rgba(var(--g-a), .10) 0%, rgba(var(--g-b), .10) 40%, rgba(var(--g-c), .10) 100%),
+        rgb(var(--bg));
+    filter: contrast(1.05) saturate(1.06);
+}
+
+/* Blobs suaves (profundidade) */
+.c2c-bg::before,
+.c2c-bg::after {
+    content: "";
+    position: absolute;
+    inset: -12%;
+    background:
+        radial-gradient(420px 320px at 18% 30%, rgba(var(--g-a), .18), transparent 60%),
+        radial-gradient(520px 400px at 82% 70%, rgba(var(--g-b), .16), transparent 60%);
+    filter: blur(52px);
+    animation: c2c-blobs 46s ease-in-out infinite;
+}
+.c2c-bg::after {
+    animation-duration: 62s;
+    animation-direction: reverse;
+    opacity: .85;
+    filter: blur(64px);
+}
+
+/* Grid sutil */
+.c2c-bg .c2c-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(to right, rgba(var(--grid), .10) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(var(--grid), .10) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mix-blend-mode: soft-light;
+    animation: c2c-grid 32s linear infinite;
+}
+
+/* Moedas (coins) – SVG data URI em tons de verde */
+.c2c-coin {
+    position: absolute;
+    width: var(--s, 64px);
+    height: var(--s, 64px);
+    left: var(--x, 50%);
+    top: var(--y, 50%);
+    transform: translate(-50%, -50%);
+    opacity: .15;                               /* claro */
+    filter: drop-shadow(0 8px 14px rgba(var(--shadow), .14));
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-image: url("data:image/svg+xml;utf8,\
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'>\
+    <defs>\
+      <radialGradient id='g' cx='50%' cy='40%' r='70%'>\
+        <stop offset='0%' stop-color='%2322c55e'/>\
+        <stop offset='100%' stop-color='%2316a34a'/>\
+      </radialGradient>\
+    </defs>\
+    <circle cx='60' cy='60' r='52' fill='url(%23g)'/>\
+    <circle cx='60' cy='60' r='56' fill='none' stroke='white' stroke-opacity='.25' stroke-width='4'/>\
+    <circle cx='60' cy='60' r='38' fill='none' stroke='white' stroke-opacity='.25' stroke-width='3'/>\
+    <text x='60' y='74' font-size='44' font-family='ui-sans-serif,system-ui,-apple-system' fill='white' text-anchor='middle' opacity='.9'>$</text>\
+  </svg>");
+    animation: c2c-float var(--t, 26s) ease-in-out infinite;
+}
+
+/* variações leves */
+.c2c-coin.b { --s: 54px; --t: 30s; opacity: .12; }
+.c2c-coin.c { --s: 76px; --t: 34s; opacity: .10; }
+:root.dark .c2c-coin { opacity: .22; }
+:root.dark .c2c-coin.b { opacity: .18; }
+:root.dark .c2c-coin.c { opacity: .16; }
+
+/* Ruído bem sutil */
+.c2c-bg .c2c-grain {
+    position: absolute;
+    inset: 0;
+    opacity: .03;
+    background-image:
+        radial-gradient(circle at 25% 15%, rgba(0,0,0,.55) 1px, transparent 1px),
+        radial-gradient(circle at 40% 35%, rgba(0,0,0,.55) 1px, transparent 1px),
+        radial-gradient(circle at 55% 55%, rgba(0,0,0,.55) 1px, transparent 1px),
+        radial-gradient(circle at 70% 75%, rgba(0,0,0,.55) 1px, transparent 1px);
+    background-size: 3px 3px;
+    animation: c2c-grain 1.9s steps(2) infinite;
+}
+:root.dark .c2c-bg .c2c-grain { opacity: .045; }
+
+/* ===== Animations ===== */
+@keyframes c2c-bg-pan {
+    0%   { background-position: 0% 0%, 100% 100%, 0 0, 0 0; }
+    50%  { background-position: 6% 3%,   94%  97%, 0 0, 0 0; }
+    100% { background-position: 0% 0%, 100% 100%, 0 0, 0 0; }
+}
+@keyframes c2c-blobs {
+    0%   { transform: translate3d(0,0,0) scale(1); }
+    50%  { transform: translate3d(-1%, 1%, 0) scale(1.04); }
+    100% { transform: translate3d(0,0,0) scale(1); }
+}
+@keyframes c2c-grid {
+    0%   { background-position: 0 0, 0 0; }
+    50%  { background-position: 28px 14px, 14px 28px; }
+    100% { background-position: 0 0, 0 0; }
+}
+@keyframes c2c-float {
+    0%   { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+    50%  { transform: translate(-50%, -50%) translateY(-14px) rotate(6deg); }
+    100% { transform: translate(-50%, -50%) translateY(0) rotate(0deg); }
+}
+@keyframes c2c-grain {
+    0%   { transform: translate3d(0,0,0); }
+    25%  { transform: translate3d(-1px, 1px, 0); }
+    50%  { transform: translate3d(1px, -1px, 0); }
+    75%  { transform: translate3d(1px, 1px, 0); }
+    100% { transform: translate3d(0,0,0); }
+}
+
+/* Acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+    .c2c-bg, .c2c-bg::before, .c2c-bg::after,
+    .c2c-grid, .c2c-coin, .c2c-grain { animation: none !important; }
+}

@@ -145,7 +145,7 @@ export default function Header() {
                     </div>
 
                     <Link
-                        href="/comprar-cripto"
+                        href="/buy"
                         className="
                         inline-flex items-center justify-center
                         rounded-full px-4 py-1.5 text-sm font-medium
