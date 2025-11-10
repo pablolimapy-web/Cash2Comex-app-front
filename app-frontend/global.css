@@ -1,0 +1,32 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    input:-webkit-autofill,
+    textarea:-webkit-autofill,
+    select:-webkit-autofill {
+        -webkit-text-fill-color: #e5e7eb; /* text-white/80 */
+        caret-color: #e5e7eb;
+        transition: background-color 9999s ease-out 0s;
+        box-shadow: 0 0 0px 1000px rgba(255,255,255,0.06) inset !important; /* bg-black/20 */
+        border-radius: 0.75rem; /* para coincidir com rounded-xl */
+    }
+
+    /* Evita “quebra” do botão de olho no fim do input */
+    .input-with-icon {
+        display: grid;
+        grid-template-columns: 1fr auto; /* conteúdo + ícone à direita */
+        align-items: center;
+    }
+    .input-with-icon input {
+        background: transparent;
+        border: none;
+        outline: none;
+        padding: 0.75rem 0; /* o padding horizontal fica no container */
+        color: #e5e7eb;
+    }
+
+}
+
