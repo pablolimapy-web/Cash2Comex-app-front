@@ -2,14 +2,17 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { authService } from '@/services/authService';
 
 export default function LoginPage() {
+    const router = useRouter();
     const [showPass, setShowPass] = useState(false);
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({ email: '', password: '' });
-    const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+    const [errors, setErrors] = useState<{ email?: string; password?: string; api?: string }>({});
 
     function validate() {
         const e: typeof errors = {};
@@ -23,13 +26,17 @@ export default function LoginPage() {
         e.preventDefault();
         if (!validate()) return;
         setLoading(true);
-        // FRONT-ONLY: simula login
-        setTimeout(() => {
+        setErrors({});
+        try {
+            await authService.login({ email: form.email.trim(), password: form.password });
+            // opcional: testar sessão
+            // await authService.me();
+            router.replace('/buy');
+        } catch (err: any) {
+            setErrors((p) => ({ ...p, api: err?.message || 'Falha no login.' }));
+        } finally {
             setLoading(false);
-            console.log('Login ✅', form);
-            // redirecione para o dashboard/compra/etc conforme sua navegação
-            window.location.href = '/buy';
-        }, 900);
+        }
     }
 
     return (
@@ -51,8 +58,11 @@ export default function LoginPage() {
             {/* Form */}
             <form onSubmit={onSubmit} className="space-y-4">
                 {/* Email */}
-                <div className={`overflow-hidden rounded-xl border bg-black/20
-                 ${errors.email ? 'border-red-500/50' : 'border-white/10 focus-within:border-white/25'}`}>
+                <div
+                    className={`overflow-hidden rounded-xl border bg-black/20 ${
+                        errors.email ? 'border-red-500/50' : 'border-white/10 focus-within:border-white/25'
+                    }`}
+                >
                     <div className="grid grid-cols-[1fr_auto] items-center px-3">
                         <div className="flex items-center gap-2">
                             <Mail size={16} className="text-white/50" />
@@ -64,40 +74,44 @@ export default function LoginPage() {
                                 autoCapitalize="none"
                                 spellCheck={false}
                                 value={form.email}
-                                onChange={(e) => setForm(s => ({ ...s, email: e.target.value }))}
+                                onChange={(e) => setForm((s) => ({ ...s, email: e.target.value }))}
                                 className="h-12 w-full bg-transparent text-white/90 placeholder-white/40 outline-none border-0"
                             />
                         </div>
-                        {/* botão opcional do lado direito, se quiser (ex: limpar) */}
-                        {/* <button className="rounded-lg p-2 text-white/60 hover:bg-white/10">…</button> */}
                     </div>
                 </div>
+                {errors.email && <p className="text-xs text-red-400">{errors.email}</p>}
 
                 {/* Senha */}
-                <div className={`overflow-hidden rounded-xl border bg-black/20
-                 ${errors.password ? 'border-red-500/50' : 'border-white/10 focus-within:border-white/25'}`}>
+                <div
+                    className={`overflow-hidden rounded-xl border bg-black/20 ${
+                        errors.password ? 'border-red-500/50' : 'border-white/10 focus-within:border-white/25'
+                    }`}
+                >
                     <div className="grid grid-cols-[1fr_auto] items-center px-3">
                         <div className="flex items-center gap-2">
                             <Lock size={16} className="text-white/50" />
                             <input
                                 type={showPass ? 'text' : 'password'}
                                 placeholder="Sua senha"
-                                autoComplete="new-password" /* no login use current-password */
+                                autoComplete="current-password"
                                 value={form.password}
-                                onChange={(e) => setForm(s => ({ ...s, password: e.target.value }))}
+                                onChange={(e) => setForm((s) => ({ ...s, password: e.target.value }))}
                                 className="h-12 w-full bg-transparent text-white/90 placeholder-white/40 outline-none border-0"
                             />
                         </div>
                         <button
                             type="button"
-                            onClick={() => setShowPass(s => !s)}
+                            onClick={() => setShowPass((s) => !s)}
                             className="ml-2 rounded-lg p-2 text-white/60 hover:bg-white/10"
                             aria-label="Alternar visibilidade da senha"
                         >
-                            {showPass ? <EyeOff size={16}/> : <Eye size={16}/>}
+                            {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                     </div>
                 </div>
+                {errors.password && <p className="text-xs text-red-400">{errors.password}</p>}
+                {errors.api && <p className="text-xs text-red-400">{errors.api}</p>}
 
                 {/* Remember + Forgot */}
                 <div className="flex items-center justify-between text-sm">
@@ -105,7 +119,9 @@ export default function LoginPage() {
                         <input type="checkbox" className="h-4 w-4 rounded border-white/20 bg-transparent" />
                         Lembrar de mim
                     </label>
-                    <Link href="#" className="text-emerald-300 hover:text-emerald-200">Esqueci minha senha</Link>
+                    <Link href="#" className="text-emerald-300 hover:text-emerald-200">
+                        Esqueci minha senha
+                    </Link>
                 </div>
 
                 {/* Submit */}
