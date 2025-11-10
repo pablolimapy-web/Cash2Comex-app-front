@@ -8,16 +8,6 @@ import { toggleSidebar, toggleTheme } from '@/store/themeConfigSlice';
 import IconCaretsDown from '@/components/icon/icon-carets-down';
 import { Copy, Check, Volume2, Sun, Moon } from 'lucide-react';
 
-/**
- * Header component that represents the application's top navigation bar.
- * It provides various functionalities such as toggling the sidebar, displaying an account number,
- * copying the account number to the clipboard, theme switching, volume control, and navigation to other sections.
- *
- * This component uses hooks like `useDispatch` and `useSelector` to interact with Redux state,
- * and it leverages internal state to manage temporary UI changes (e.g., when copying the account number).
- *
- * @return {JSX.Element} The rendered header component with navigation, account actions, and theme management features.
- */
 export default function Header() {
     const dispatch = useDispatch();
     const themeConfig = useSelector((s: IRootState) => s.themeConfig);
@@ -39,49 +29,61 @@ export default function Header() {
         sticky top-0 z-40 border-b border-slate-200 bg-white text-slate-900
         dark:border-white/10 dark:bg-[#0B0F12] dark:text-white
       "
-            style={{ height: 'var(--header-h)' }}
         >
-            <div className="flex h-full items-center justify-between gap-4 px-6">
-                {/* toggle sidebar (mobile) */}
-                <button
-                    type="button"
-                    className="
-            flex h-8 w-8 items-center justify-center rounded-full
-            hover:bg-black/[0.05] dark:hover:bg-white/10 lg:hidden
-            transition-colors
-          "
-                    onClick={() => dispatch(toggleSidebar())}
-                    aria-label="Abrir menu"
-                >
-                    <IconCaretsDown className="rotate-90 opacity-80" />
-                </button>
+            {/* em vez de height fixa, use min-height + padding responsivo */}
+            <div className="flex h-full min-h-[56px] sm:min-h-[64px] items-center justify-between gap-3 px-4 sm:px-6 py-1 sm:py-2 flex-nowrap">
+                {/* ESQUERDA: toggle (mobile) + logo */}
+                <div className="flex items-center gap-2">
+                    <button
+                        type="button"
+                        className="
+              flex h-9 w-9 items-center justify-center rounded-full
+              hover:bg-black/[0.05] dark:hover:bg-white/10 lg:hidden
+              transition-colors
+            "
+                        onClick={() => dispatch(toggleSidebar())}
+                        aria-label="Abrir menu"
+                    >
+                        <IconCaretsDown className="rotate-90 opacity-80" />
+                    </button>
 
-                <Link
-                    href="/"
-                    className="flex items-center gap-2 group select-none"
-                    aria-label="Ir para o início">
-                    <img
-                        src="/assets/images/LogoReal.png"
-                        alt="Cash2Comex"
-                        className="h-40 w-auto opacity-90 transition-all duration-300 group-hover:opacity-100 group-hover:scale-[1.03]"
-                    />
+                    <Link
+                        href="/"
+                        className="flex items-center select-none shrink-0"
+                        aria-label="Ir para o início"
+                    >
+                        <img
+                            src="/assets/images/LogoReal.png"
+                            alt="Cash2Comex"
+                            className="
+                        h-16       /* tamanho padrão (mobile) */
+                        sm:h-14    /* um pouco maior em telas pequenas */
+                        md:h-28    /* grande em desktop */
+                        lg:h-30    /* ainda maior em telas grandes */
+                        w-auto object-contain opacity-95
+                        transition-all duration-300 ease-out
+                        hover:opacity-100 hover:scale-[1.05]
+                      "
+                        />
 
-                </Link>
+                    </Link>
+                </div>
 
-
-
-                <div className="ml-auto flex items-center gap-3">
-                    {/* Conta + copiar */}
+                {/* DIREITA: ações */}
+                <div className="ml-auto flex items-center gap-2 sm:gap-3">
+                    {/* Conta + copiar (mostrar de md pra cima) */}
                     <div
                         className="
-              hidden items-center gap-2 rounded-full border px-3 py-1 text-sm
+              hidden md:flex items-center gap-2 rounded-full border px-3 py-1 text-sm
               border-slate-200 bg-slate-50 text-slate-700
               dark:border-white/10 dark:bg-white/[0.04] dark:text-white/80
-              md:flex transition-colors
+              transition-colors
             "
                     >
                         <span className="text-slate-500 dark:text-white/60">Conta:</span>
-                        <strong className="text-slate-800 dark:text-white/90">{accountNumber}</strong>
+                        <strong className="text-slate-800 dark:text-white/90">
+                            {accountNumber}
+                        </strong>
                         <button
                             onClick={copyAccount}
                             className="
@@ -96,12 +98,12 @@ export default function Header() {
                         </button>
                     </div>
 
-                    <span className="hidden h-6 w-px bg-slate-200 dark:bg-white/10 md:block" />
+                    <span className="hidden md:block h-6 w-px bg-slate-200 dark:bg-white/10" />
 
-                    {/* som */}
+                    {/* Som (oculto no xs para caber melhor) */}
                     <button
                         className="
-              flex h-8 w-8 items-center justify-center rounded-full border
+              hidden xs:flex h-8 w-8 items-center justify-center rounded-full border
               border-slate-200 bg-slate-50 hover:bg-slate-100
               dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-white/10
             "
@@ -110,7 +112,7 @@ export default function Header() {
                         <Volume2 size={16} />
                     </button>
 
-                    {/* tema */}
+                    {/* Tema */}
                     <button
                         className="
               flex h-8 w-8 items-center justify-center rounded-full border
@@ -123,13 +125,12 @@ export default function Header() {
                         {isDark ? <Sun size={16} /> : <Moon size={16} />}
                     </button>
 
-                    {/* conectar carteira */}
+                    {/* Conectar carteira (md pra cima) */}
                     <div
                         className="
-              hidden items-center gap-2 rounded-full border px-3 py-1 text-sm
+              hidden md:flex items-center gap-2 rounded-full border px-3 py-1 text-sm
               border-slate-200 bg-slate-50 text-slate-700
               dark:border-white/10 dark:bg-white/[0.04] dark:text-white/80
-              md:flex
             "
                     >
                         <span>Conectar Carteira</span>
@@ -144,18 +145,19 @@ export default function Header() {
             </span>
                     </div>
 
+                    {/* CTA Comprar cripto (aparece a partir de sm) */}
                     <Link
                         href="/buy"
                         className="
-                        inline-flex items-center justify-center
-                        rounded-full px-4 py-1.5 text-sm font-medium
-                        text-white shadow-sm
-                        bg-gradient-to-r from-purple-500 to-indigo-500
-                        hover:from-purple-600 hover:to-indigo-600
-                        active:scale-[.97]
-                        transition-all duration-300
-                        dark:from-purple-600 dark:to-indigo-700
-                      "
+              hidden sm:inline-flex items-center justify-center
+              rounded-full px-4 py-1.5 text-sm font-medium
+              text-white shadow-sm
+              bg-gradient-to-r from-purple-500 to-indigo-500
+              hover:from-purple-600 hover:to-indigo-600
+              active:scale-[.97]
+              transition-all duration-300
+              dark:from-purple-600 dark:to-indigo-700
+            "
                     >
                         Comprar cripto
                     </Link>

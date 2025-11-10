@@ -1,14 +1,16 @@
 'use client';
 
 import { useMemo, useState, useCallback, useEffect } from 'react';
-import { ArrowLeftRight, ChevronDown } from 'lucide-react';
+import { ArrowLeft, ArrowLeftRight, ChevronDown } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+
 import ModalSelect, { SelectItem } from '@/components/common/ModalSelect';
 import TokenLogo from '@/components/crypto/TokenLogo';
 import NetworkLogo from '@/components/crypto/NetworkLogo';
 import { TOKENS_BY_NETWORK } from '@/app/buy/data/tokens';
 import { NETWORKS } from '@/app/buy/data/networks';
 import { getQuote } from '@/lib/quotes';
-
 
 /* ----------------- helpers ----------------- */
 function parseBRL(v: string) {
@@ -18,12 +20,33 @@ function toBRL(n: number) {
     return (n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+/* ----------------- animações ----------------- */
+const fadeUp: any = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0 },
+};
+const scaleIn: any = {
+    hidden: { opacity: 0, scale: 0.98 },
+    show: { opacity: 1, scale: 1 },
+};
+const containerStagger: any = {
+    hidden: {},
+    show: {
+        transition: {
+            staggerChildren: 0.08,
+            delayChildren: 0.05,
+        },
+    },
+};
+
 /* ----------------- page ----------------- */
 export default function ComprarPage({
                                         searchParams,
                                     }: {
     searchParams?: { mode?: 'buy' | 'sell' };
 }) {
+    const router = useRouter();
+
     // modo inicial (?mode=sell)
     const initialMode = (searchParams?.mode === 'sell' ? 'sell' : 'buy') as 'buy' | 'sell';
     const [mode, setMode] = useState<'buy' | 'sell'>(initialMode);
@@ -49,7 +72,8 @@ export default function ComprarPage({
             if (!hasPay || paySymbol === 'BRL') setPaySymbol(availableTokens[0]?.symbol ?? 'ETH');
             setRcvSymbol('BRL');
         }
-    }, [networkId, mode, availableTokens]); // eslint-disable-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [networkId, mode, availableTokens]);
 
     const currentToken =
         (mode === 'buy'
@@ -149,26 +173,59 @@ export default function ComprarPage({
 
     return (
         <>
-            {/* Background animado (tema-aware) */}
+            {/* --------- FUNDO (seu c2c + overlay) --------- */}
             <div className="c2c-bg">
                 <div className="c2c-grid" />
-                {/* três coins, em posições distintas */}
                 <div className="c2c-coin" style={{ '--x': '14%', '--y': '26%' } as React.CSSProperties} />
                 <div className="c2c-coin b" style={{ '--x': '86%', '--y': '36%' } as React.CSSProperties} />
                 <div className="c2c-coin c" style={{ '--x': '74%', '--y': '80%' } as React.CSSProperties} />
                 <div className="c2c-grain" />
             </div>
+            <div className="fixed inset-0 -z-10 pointer-events-none">
+                <div
+                    className="
+            absolute inset-0
+            bg-[radial-gradient(1100px_700px_at_20%_-10%,rgba(99,102,241,0.20),transparent),
+                radial-gradient(900px_600px_at_85%_110%,rgba(147,51,234,0.14),transparent)]
+            dark:bg-[radial-gradient(1100px_700px_at_20%_-10%,rgba(99,102,241,0.28),transparent),
+                radial-gradient(900px_600px_at_85%_110%,rgba(147,51,234,0.20),transparent)]
+          "
+                />
+                <div className="absolute inset-0 bg-[url('/assets/textures/noise.png')] opacity-[0.05]" />
+            </div>
+            <div className="fixed inset-0 -z-[5] pointer-events-none bg-white/20 dark:bg-black/20 backdrop-blur-2xl" />
 
-            {/* conteúdo */}
-            <div className="relative z-10 mx-auto max-w-[720px] px-4 py-10">
-            {/* toggle comprar/vender */}
-                <div className="mb-6 flex items-center justify-center">
+            {/* --------- CONTEÚDO COM ANIMAÇÕES --------- */}
+            <motion.div
+                className="relative z-10 mx-auto max-w-[720px] px-4 py-10"
+                variants={containerStagger}
+                initial="hidden"
+                animate="show"
+            >
+                {/* Botão VOLTAR */}
+                <motion.button
+                    variants={fadeUp}
+                    onClick={() => router.push('/')}
+                    className="
+            mb-6 inline-flex items-center gap-2 rounded-full border
+            border-slate-300 bg-white/70 px-3 py-1.5 text-sm font-medium text-slate-700
+            hover:bg-white transition
+            dark:border-white/10 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15
+          "
+                    aria-label="Voltar à página inicial"
+                >
+                    <ArrowLeft size={16} />
+                    Voltar à página inicial
+                </motion.button>
+
+                {/* toggle comprar/vender */}
+                <motion.div className="mb-6 flex items-center justify-center" variants={fadeUp}>
                     <div className="flex gap-2 rounded-full border p-1 border-slate-300 bg-slate-100 dark:border-white/10 dark:bg-white/5">
                         <button
                             onClick={() => switchMode('buy')}
                             className={`rounded-full px-4 py-1 text-sm transition ${
                                 mode === 'buy'
-                                    ? 'bg-slate-900 text-white dark:bg-white dark:text-black'
+                                    ? 'bg-slate-900 text-white dark:bg.white dark:text-black'
                                     : 'text-slate-700 hover:text-slate-900 dark:text-white/70 dark:hover:text-white'
                             }`}
                         >
@@ -178,23 +235,30 @@ export default function ComprarPage({
                             onClick={() => switchMode('sell')}
                             className={`rounded-full px-4 py-1 text-sm transition ${
                                 mode === 'sell'
-                                    ? 'bg-slate-900 text-white dark:bg-white dark:text-black'
+                                    ? 'bg-slate-900 text-white dark:bg.white dark:text-black'
                                     : 'text-slate-700 hover:text-slate-900 dark:text-white/70 dark:hover:text-white'
                             }`}
                         >
                             Vender
                         </button>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* card principal */}
-                <div className="rounded-3xl border border-slate-300 bg-slate-100 p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.03] md:p-6">
+                <motion.div
+                    variants={scaleIn}
+                    className="rounded-3xl border border-slate-300 bg-slate-100 p-5 shadow-sm dark:border-white/10 dark:bg-white/[0.03] md:p-6"
+                    transition={{ duration: 0.35, ease: 'easeOut' }}
+                >
                     {/* Rede */}
-                    <div className="mb-4 rounded-2xl border border-slate-300 bg-slate-200/60 p-4 dark:border-white/10 dark:bg-white/[0.035]">
+                    <motion.div
+                        variants={fadeUp}
+                        className="mb-4 rounded-2xl border border-slate-300 bg-slate-200/60 p-4 dark:border-white/10 dark:bg-white/[0.035]"
+                    >
                         <div className="text-xs text-slate-600 dark:text-white/60">Receber na rede</div>
                         <button
                             onClick={() => setOpenNetwork(true)}
-                            className="mt-2 flex w-full items-center justify-between rounded-xl border border-slate-300 bg-white px-3 py-3 text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-black/20 dark:text-white/90"
+                            className="mt-2 flex w-full items-center justify-between rounded-xl border border-slate-300 bg.white px-3 py-3 text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-black/20 dark:text-white/90"
                         >
               <span className="flex items-center gap-2">
                 <NetworkLogo id={networkId} size={20} />
@@ -202,12 +266,15 @@ export default function ComprarPage({
               </span>
                             <ChevronDown size={18} className="opacity-60" />
                         </button>
-                    </div>
+                    </motion.div>
 
                     {/* inputs */}
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
+                    <motion.div variants={containerStagger} className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
                         {/* pagar */}
-                        <div className="rounded-2xl border border-slate-300 bg-slate-200/60 p-4 dark:border-white/10 dark:bg-white/[0.035]">
+                        <motion.div
+                            variants={fadeUp}
+                            className="rounded-2xl border border-slate-300 bg-slate-200/60 p-4 dark:border-white/10 dark:bg-white/[0.035]"
+                        >
                             <div className="text-xs text-slate-600 dark:text-white/60">
                                 {mode === 'buy' ? 'Pagar com (BRL)' : 'Pagar com'}
                             </div>
@@ -215,7 +282,7 @@ export default function ComprarPage({
                             {mode === 'sell' && (
                                 <button
                                     onClick={() => setOpenToken(true)}
-                                    className="mt-2 flex w-full items-center justify-between rounded-xl border border-slate-300 bg-white px-3 py-3 text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-black/20 dark:text-white/90"
+                                    className="mt-2 flex w-full items-center justify-between rounded-xl border border-slate-300 bg.white px-3 py-3 text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-black/20 dark:text-white/90"
                                 >
                   <span className="flex items-center gap-2">
                     <TokenLogo symbol={paySymbol} size={18} />
@@ -224,9 +291,7 @@ export default function ComprarPage({
                         {paySymbol}
                           <span className="text-slate-500 dark:text-white/60"> — {currentToken?.name ?? ''}</span>
                       </span>
-                        {currentNet && (
-                            <span className="text-xs text-slate-500 dark:text-white/45">{currentNet.name}</span>
-                        )}
+                        {currentNet && <span className="text-xs text-slate-500 dark:text-white/45">{currentNet.name}</span>}
                     </div>
                   </span>
                                     <ChevronDown size={18} className="opacity-60" />
@@ -239,13 +304,16 @@ export default function ComprarPage({
                                     placeholder={mode === 'buy' ? '0,00' : '0,000000'}
                                     value={mode === 'buy' ? amountFiat : amountCrypto}
                                     onChange={(e) => (mode === 'buy' ? setAmountFiat(e.target.value) : setAmountCrypto(e.target.value))}
-                                    className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-lg text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-400 dark:border-white/10 dark:bg-black/20 dark:text-white/90 dark:placeholder:text-white/40 dark:focus:border-white/25"
+                                    className="w-full rounded-xl border border-slate-300 bg.white px-3 py-3 text-lg text-slate-900 placeholder:text-slate-400 outline-none focus:border-slate-400 dark:border-white/10 dark:bg-black/20 dark:text-white/90 dark:placeholder:text-white/40 dark:focus:border-white/25"
                                 />
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* seta trocar */}
-                        <div className="order-last col-span-1 grid place-content-center md:order-none md:col-span-2 md:-my-2">
+                        <motion.div
+                            variants={fadeUp}
+                            className="order-last col-span-1 grid place-content-center md:order-none md:col-span-2 md:-my-2"
+                        >
                             <button
                                 onClick={swapSides}
                                 className="group grid place-content-center rounded-full border border-slate-300 bg-slate-200 p-2 hover:bg-slate-300 dark:border-white/10 dark:bg-white/[0.06] dark:hover:border-white/30"
@@ -255,18 +323,19 @@ export default function ComprarPage({
                                     className="text-slate-700 group-hover:text-slate-900 dark:text-white/80 dark:group-hover:text-white"
                                 />
                             </button>
-                        </div>
+                        </motion.div>
 
                         {/* receber */}
-                        <div className="rounded-2xl border border-slate-300 bg-slate-200/60 p-4 dark:border-white/10 dark:bg-white/[0.035]">
-                            <div className="text-xs text-slate-600 dark:text-white/60">
-                                {mode === 'buy' ? 'Receber' : 'Receber (BRL)'}
-                            </div>
+                        <motion.div
+                            variants={fadeUp}
+                            className="rounded-2xl border border-slate-300 bg-slate-200/60 p-4 dark:border-white/10 dark:bg-white/[0.035]"
+                        >
+                            <div className="text-xs text-slate-600 dark:text-white/60">{mode === 'buy' ? 'Receber' : 'Receber (BRL)'}</div>
 
                             {mode === 'buy' && (
                                 <button
                                     onClick={() => setOpenToken(true)}
-                                    className="mt-2 flex w-full items-center justify-between rounded-xl border border-slate-300 bg-white px-3 py-3 text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-black/20 dark:text-white/90"
+                                    className="mt-2 flex w-full items-center justify-between rounded-xl border border-slate-300 bg.white px-3 py-3 text-slate-800 hover:bg-slate-50 dark:border-white/10 dark:bg-black/20 dark:text-white/90"
                                 >
                   <span className="flex items-center gap-2">
                     <TokenLogo symbol={rcvSymbol} size={18} />
@@ -275,9 +344,7 @@ export default function ComprarPage({
                         {rcvSymbol}
                           <span className="text-slate-500 dark:text-white/60"> — {currentToken?.name ?? ''}</span>
                       </span>
-                        {currentNet && (
-                            <span className="text-xs text-slate-500 dark:text-white/45">{currentNet.name}</span>
-                        )}
+                        {currentNet && <span className="text-xs text-slate-500 dark:text-white/45">{currentNet.name}</span>}
                     </div>
                   </span>
                                     <ChevronDown size={18} className="opacity-60" />
@@ -288,14 +355,17 @@ export default function ComprarPage({
                                 <input
                                     readOnly
                                     value={mode === 'buy' ? (quote.outCrypto ?? 0).toFixed(6) : toBRL(quote.outFiat ?? 0)}
-                                    className="w-full cursor-not-allowed rounded-xl border border-slate-300 bg-white px-3 py-3 text-lg text-slate-700 dark:border-white/10 dark:bg-black/20 dark:text-white/60"
+                                    className="w-full cursor-not-allowed rounded-xl border border-slate-300 bg.white px-3 py-3 text-lg text-slate-700 dark:border-white/10 dark:bg-black/20 dark:text-white/60"
                                 />
                             </div>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
 
                     {/* resumo */}
-                    <div className="mt-4 rounded-2xl border border-slate-300 bg-slate-200/70 p-4 text-sm dark:border-white/10 dark:bg-white/[0.035]">
+                    <motion.div
+                        variants={fadeUp}
+                        className="mt-4 rounded-2xl border border-slate-300 bg-slate-200/70 p-4 text-sm dark:border-white/10 dark:bg-white/[0.035]"
+                    >
                         <div className="flex items-center justify-between text-slate-700 dark:text-white/70">
                             <span>Taxa de processamento</span>
                             <span>{Math.round((quote.feePct || 0) * 100)}%</span>
@@ -303,26 +373,25 @@ export default function ComprarPage({
                         <div className="mt-2 flex items-center justify-between text-slate-900 dark:text-white">
                             <span>Valor aproximado final</span>
                             <span>
-                {mode === 'buy'
-                    ? `${(quote.outCrypto ?? 0).toFixed(6)} ${rcvSymbol}`
-                    : `R$ ${toBRL(quote.outFiat ?? 0)}`}
+                {mode === 'buy' ? `${(quote.outCrypto ?? 0).toFixed(6)} ${rcvSymbol}` : `R$ ${toBRL(quote.outFiat ?? 0)}`}
               </span>
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <button
+                    <motion.button
+                        variants={fadeUp}
                         disabled={mode === 'buy' ? !parseBRL(amountFiat) : !(Number(amountCrypto) || 0)}
                         className="mt-4 w-full rounded-2xl border border-emerald-300 bg-emerald-200 px-4 py-4 text-sm font-medium text-emerald-900 transition hover:bg-emerald-300 dark:border-emerald-500/40 dark:bg-emerald-500/20 dark:text-emerald-200 dark:hover:bg-emerald-400/20 disabled:opacity-40"
                     >
                         {mode === 'buy' ? `Comprar ${rcvSymbol}` : `Vender ${paySymbol}`}
-                    </button>
+                    </motion.button>
 
-                    <div className="mt-2 text-[10px] text-slate-500 dark:text-white/40">
+                    <motion.div variants={fadeUp} className="mt-2 text-[10px] text-slate-500 dark:text-white/40">
                         ** Cotação mock para desenvolvimento. Valores podem variar.
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
 
-                {/* Modais */}
+                {/* Modais (sem animação de entrada porque já são modais próprios) */}
                 <ModalSelect
                     open={openNetwork}
                     onClose={() => setOpenNetwork(false)}
@@ -345,7 +414,7 @@ export default function ComprarPage({
                         else setPaySymbol(sym);
                     }}
                 />
-            </div>
+            </motion.div>
         </>
     );
 }
